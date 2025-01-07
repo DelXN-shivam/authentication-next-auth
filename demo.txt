@@ -1,0 +1,123 @@
+'use client';
+
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { Toaster,toast } from 'react-hot-toast';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+
+const SignUpForm = () => {
+
+    const [name, setName] = React.useState("");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [error, setError] = React.useState("Error msg");
+
+    const router = useRouter();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!name || !email || !password) {
+            setError("All Fields are Necessary.")
+            return;
+        }
+
+        try {
+            // const resUserExists = await fetch("api/userExists", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({ email }),
+            // });
+
+            // const { user } = await resUserExists.json();
+
+            // if(user){
+            //     setError("User Already Exists");
+            //     return ;
+            // }
+
+            const res = await fetch('api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password
+                }),
+            });
+            const data = await res.json()
+            console.log(data)
+           if(data.message==="User Registred."){
+            router.push("/")
+            
+           }else if(data.message==="User Already Exist"){
+            toast.error("User Already Exist!Kindly Login")
+           }else{
+            toast.error("Someting went wrong!")
+           }
+
+        } catch (error) {
+            console.error("Error during registration: ", error);
+        }
+    }
+
+    console.log("Name: ", name);
+
+    return (
+        <div className="flex justify-center items-center h-dvh">
+        <Toaster/>
+            <Card>
+                <CardHeader className="justify-center items-center">
+                    <CardTitle>Sign Up</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <Input onChange={(e) => {
+                            setName(e.target.value)
+                        }}
+                            type="text" placeholder="Full Name" name="name" />
+                        <Input onChange={(e) => {
+                            setEmail(e.target.value)
+                        }}
+                            type="email" placeholder="Email" name="email" />
+                        <Input onChange={(e) => {
+                            setPassword(e.target.value)
+                        }}
+                            type="password" placeholder="Password" name="password" />
+                        <Button type="submit">Sign Up</Button>
+                    </form>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-3">
+                    {/* <Button
+                        type="button"
+                        variant="outline">
+                        Login with Google
+                    </Button> */}
+                    {
+                        // error && (<Label htmlFor="">{error}</Label>
+                        // )
+                        error && (<h2 className="text-red-500">{error}</h2>)
+                    }
+                    <Link href="/login" className="mt-2">
+                        Already have an Account? Login
+                    </Link>
+                </CardFooter>
+            </Card>
+        </div>
+    )
+}
+
+export default SignUpForm
